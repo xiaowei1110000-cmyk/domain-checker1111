@@ -3,10 +3,2494 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>多群网站监控系统 v10.0 - 完整版</title>
+    <title>多群网站监控系统 v9.0 - 增强版</title>
     <style>
-        /* 保持之前的样式不变 */
-        /* ... 之前的CSS样式代码 ... */
+        /* ===== 全局样式重置 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            --warning-gradient: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            --danger-gradient: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            --info-gradient: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            --telegram-gradient: linear-gradient(135deg, #0088cc 0%, #006699 100%);
+            
+            --primary-color: #667eea;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --info-color: #3498db;
+            --light-color: #f8f9fa;
+            --dark-color: #2c3e50;
+            --border-color: #e9ecef;
+            --text-primary: #2c3e50;
+            --text-secondary: #6c757d;
+            
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.12);
+            --shadow-xl: 0 20px 60px rgba(0,0,0,0.15);
+            
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            
+            --transition-normal: 0.3s ease;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-primary);
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: var(--primary-gradient);
+        }
+        
+        /* ===== 头部样式 ===== */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            position: relative;
+        }
+        
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+        }
+        
+        h1 {
+            color: transparent;
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+        
+        /* ===== 布局 ===== */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* ===== 群组配置 ===== */
+        .group-config {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 25px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+            height: fit-content;
+            position: sticky;
+            top: 30px;
+        }
+        
+        .group-config::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--telegram-gradient);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        }
+        
+        .group-config h3 {
+            color: var(--dark-color);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .group-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        
+        .group-item {
+            background: var(--light-color);
+            border-radius: var(--radius-md);
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            transition: var(--transition-normal);
+            cursor: pointer;
+        }
+        
+        .group-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+            background: #e8f4fc;
+        }
+        
+        .group-item.active {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(41, 128, 185, 0.1) 100%);
+            border-color: var(--info-color);
+        }
+        
+        .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .group-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .group-buttons {
+            display: flex;
+            gap: 6px;
+        }
+        
+        .group-btn {
+            padding: 4px 8px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            cursor: pointer;
+            background: var(--info-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .group-btn.delete {
+            background: var(--danger-color);
+        }
+        
+        .group-btn.edit {
+            background: var(--warning-color);
+        }
+        
+        .group-details {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .group-details div {
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* ===== 表单元素 ===== */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            background: var(--light-color);
+            transition: var(--transition-normal);
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        textarea {
+            height: 150px;
+            resize: vertical;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        /* ===== 按钮样式 ===== */
+        .buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-normal);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-success {
+            background: var(--success-gradient);
+            color: white;
+        }
+        
+        .btn-telegram {
+            background: var(--telegram-gradient);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: var(--warning-gradient);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: var(--danger-gradient);
+            color: white;
+        }
+        
+        .btn-info {
+            background: var(--info-gradient);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: var(--light-color);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+        }
+        
+        /* ===== 配置区域 ===== */
+        .config-section {
+            background: linear-gradient(135deg, rgba(212, 237, 218, 0.1) 0%, rgba(195, 230, 203, 0.1) 100%);
+            border: 1px solid rgba(40, 167, 69, 0.15);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .config-section h3 {
+            color: var(--success-color);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .input-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: end;
+        }
+        
+        /* ===== 监控状态 ===== */
+        .monitor-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .status-card {
+            background: white;
+            padding: 20px;
+            border-radius: var(--radius-lg);
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            border-top: 5px solid var(--info-color);
+            transition: var(--transition-normal);
+        }
+        
+        .status-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .status-card.warning { border-top-color: var(--warning-color); }
+        .status-card.danger { border-top-color: var(--danger-color); }
+        .status-card.success { border-top-color: var(--success-color); }
+        .status-card.telegram { border-top-color: #0088cc; }
+        
+        .status-number {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin: 10px 0;
+        }
+        
+        .status-title {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        
+        /* ===== 域名列表 ===== */
+        .domain-list {
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-radius: var(--radius-lg);
+            max-height: 300px;
+            overflow-y: auto;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            display: none;
+        }
+        
+        .domain-item {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .domain-item:last-child {
+            border-bottom: none;
+        }
+        
+        .domain-name {
+            flex: 1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .domain-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            min-width: 100px;
+            text-align: center;
+        }
+        
+        .status-pending { background: #f8f9fa; color: #6c757d; }
+        .status-testing { background: #e3f2fd; color: #1976d2; animation: pulse 1.5s infinite; }
+        .status-success { background: #e8f5e8; color: #2e7d32; }
+        .status-error { background: #ffebee; color: #c62828; }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        /* ===== 测试控制 ===== */
+        .test-controls {
+            background: linear-gradient(135deg, #f8fdff 0%, #e8f4fc 100%);
+            padding: 20px;
+            border-radius: var(--radius-lg);
+            margin: 20px 0;
+            border: 1px solid rgba(52, 152, 219, 0.2);
+            box-shadow: var(--shadow-md);
+            display: none;
+        }
+        
+        .test-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-item {
+            background: white;
+            padding: 12px;
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .progress-container {
+            margin: 20px 0;
+        }
+        
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: var(--light-color);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--success-gradient);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        /* ===== 监控日志 ===== */
+        .monitor-log {
+            background: var(--dark-color);
+            padding: 15px;
+            border-radius: var(--radius-lg);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: #e9ecef;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .log-entry {
+            padding: 8px 0;
+            border-bottom: 1px solid #34495e;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+        
+        .log-time {
+            color: #adb5bd;
+            font-size: 0.8rem;
+            min-width: 60px;
+        }
+        
+        /* ===== 状态消息 ===== */
+        .status-message {
+            margin-top: 10px;
+            padding: 10px 15px;
+            border-radius: var(--radius-md);
+            display: none;
+            font-weight: 500;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .status-success {
+            background: rgba(212, 237, 218, 0.9);
+            color: #155724;
+            border-left: 5px solid var(--success-color);
+        }
+        
+        .status-error {
+            background: rgba(248, 215, 218, 0.9);
+            color: #721c24;
+            border-left: 5px solid var(--danger-color);
+        }
+        
+        /* ===== 页脚 ===== */
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        /* ===== 响应式设计 ===== */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .main-layout {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .group-config {
+                position: static;
+            }
+            
+            .buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+        
+        /* ===== 滚动条美化 ===== */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        .monitor-log::-webkit-scrollbar-track {
+            background: #2c3e50;
+        }
+        
+        .monitor-log::-webkit-scrollbar-thumb {
+            background: #4a6572;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-broadcast-tower"></i> 多群网站监控系统 v9.0</h1>
+            <p class="subtitle">支持多群监控 | 一对一结果推送 | 运营商节点分析 | 即时通知</p>
+        </header>
+        
+        <div class="main-layout">
+            <div class="main-content">
+                <!-- 说明区域 -->
+                <div class="config-section">
+                    <h3><i class="fas fa-info-circle"></i> 使用说明</h3>
+                    <p>1. 在右侧添加群组配置（每个群独立的Bot和测试链接）</p>
+                    <p>2. 系统会自动为每个链接打开ITDOG页面测试</p>
+                    <p>3. <strong>每次测试完立即发送结果</strong>到对应群组（不只是异常）</p>
+                    <p>4. 异常时会@群组中指定的用户（多个用户用逗号分隔）</p>
+                    <p>5. 支持运营商节点分析，区分移动/联通/电信异常</p>
+                </div>
+                
+                <!-- 监控状态 -->
+                <div class="monitor-status" id="monitor-status">
+                    <div class="status-card">
+                        <div class="status-title">活跃群组</div>
+                        <div class="status-number" id="active-groups-count">0</div>
+                    </div>
+                    <div class="status-card warning">
+                        <div class="status-title">今日测试</div>
+                        <div class="status-number" id="today-tests">0</div>
+                    </div>
+                    <div class="status-card telegram">
+                        <div class="status-title">发送通知</div>
+                        <div class="status-number" id="sent-notifications">0</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-title">总链接数</div>
+                        <div class="status-number" id="total-domains">0</div>
+                    </div>
+                </div>
+                
+                <!-- 批量测试 -->
+                <div class="config-section">
+                    <h3><i class="fas fa-globe"></i> 批量测试控制</h3>
+                    
+                    <div class="buttons">
+                        <button class="btn btn-success" id="start-all-btn">
+                            <i class="fas fa-play"></i> 启动所有群组
+                        </button>
+                        <button class="btn btn-warning" id="start-selected-btn">
+                            <i class="fas fa-bolt"></i> 启动选中群组
+                        </button>
+                        <button class="btn btn-danger" id="stop-all-btn">
+                            <i class="fas fa-stop"></i> 停止所有测试
+                        </button>
+                        <button class="btn btn-info" id="test-now-btn">
+                            <i class="fas fa-rocket"></i> 立即测试一次
+                        </button>
+                    </div>
+                    
+                    <!-- 测试进度 -->
+                    <div class="test-controls" id="test-controls">
+                        <div class="test-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">进行中</div>
+                                <div class="stat-value" id="active-tests">0</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">已测试</div>
+                                <div class="stat-value" id="tested-count">0</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">成功</div>
+                                <div class="stat-value" id="success-count">0</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">异常</div>
+                                <div class="stat-value" id="error-count">0</div>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-container">
+                            <div class="progress-info">
+                                <span>测试进度</span>
+                                <span id="progress-text">0/0</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-bar"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="buttons">
+                            <button class="btn btn-warning" id="pause-btn">
+                                <i class="fas fa-pause"></i> 暂停
+                            </button>
+                            <button class="btn btn-danger" id="stop-btn">
+                                <i class="fas fa-stop"></i> 停止
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 监控日志 -->
+                <div class="config-section">
+                    <h3><i class="fas fa-clipboard-list"></i> 监控日志</h3>
+                    <div class="monitor-log" id="monitor-log">
+                        <div class="log-entry">
+                            <span class="log-time">就绪</span>
+                            <span class="log-content">🎉 多群监控系统 v9.0 已启动 - 支持一对一结果发送</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 群组配置 -->
+            <div class="group-config">
+                <h3><i class="fab fa-telegram"></i> 群组配置管理</h3>
+                
+                <div class="form-group">
+                    <label for="group-name">群组名称</label>
+                    <input type="text" id="group-name" placeholder="例如：主监控群">
+                </div>
+                
+                <div class="form-group">
+                    <label for="bot-token">Bot Token</label>
+                    <input type="password" id="bot-token" placeholder="输入Telegram Bot Token">
+                </div>
+                
+                <div class="form-group">
+                    <label for="chat-id">Chat ID</label>
+                    <input type="text" id="chat-id" placeholder="输入群组Chat ID">
+                </div>
+                
+                <div class="form-group">
+                    <label for="mention-users">异常时@的用户ID</label>
+                    <input type="text" id="mention-users" placeholder="例如：123456,789012（逗号分隔）">
+                </div>
+                
+                <div class="form-group">
+                    <label for="connectivity-threshold">连通率阈值 (%)</label>
+                    <input type="number" id="connectivity-threshold" min="1" max="100" value="90" placeholder="低于此值发送异常通知">
+                </div>
+                
+                <div class="form-group">
+                    <label for="group-domains">测试链接（每行一个）</label>
+                    <textarea id="group-domains" placeholder="https://example.com&#10;http://test.com/path&#10;www.domain.com"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="test-interval">测试间隔（分钟）</label>
+                    <input type="number" id="test-interval" min="1" value="60">
+                </div>
+                
+                <div class="buttons">
+                    <button class="btn btn-telegram" id="save-group-btn">
+                        <i class="fas fa-save"></i> 保存群组
+                    </button>
+                    <button class="btn btn-secondary" id="clear-form-btn">
+                        <i class="fas fa-times"></i> 清空
+                    </button>
+                    <button class="btn btn-danger" id="delete-group-btn" style="display: none;">
+                        <i class="fas fa-trash"></i> 删除群组
+                    </button>
+                </div>
+                
+                <div id="config-status" class="status-message"></div>
+                
+                <!-- 群组列表 -->
+                <div class="group-list" id="group-list">
+                    <!-- 群组项目会动态添加到这里 -->
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>多群网站监控系统 v9.0 | 与Tampermonkey脚本配合使用 | 运营商节点分析版</p>
+            <p>请确保已安装 Tampermonkey 扩展并加载监控脚本</p>
+        </footer>
+    </div>
+
+<script>
+// ============================================
+// 多群网站监控系统 v9.0
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+    // 元素引用
+    const elements = {
+        // 群组配置元素
+        groupName: document.getElementById('group-name'),
+        botToken: document.getElementById('bot-token'),
+        chatId: document.getElementById('chat-id'),
+        mentionUsers: document.getElementById('mention-users'),
+        connectivityThreshold: document.getElementById('connectivity-threshold'),
+        groupDomains: document.getElementById('group-domains'),
+        testInterval: document.getElementById('test-interval'),
+        saveGroupBtn: document.getElementById('save-group-btn'),
+        clearFormBtn: document.getElementById('clear-form-btn'),
+        deleteGroupBtn: document.getElementById('delete-group-btn'),
+        groupList: document.getElementById('group-list'),
+        configStatus: document.getElementById('config-status'),
+        
+        // 测试控制元素
+        startAllBtn: document.getElementById('start-all-btn'),
+        startSelectedBtn: document.getElementById('start-selected-btn'),
+        stopAllBtn: document.getElementById('stop-all-btn'),
+        testNowBtn: document.getElementById('test-now-btn'),
+        testControls: document.getElementById('test-controls'),
+        pauseBtn: document.getElementById('pause-btn'),
+        stopBtn: document.getElementById('stop-btn'),
+        activeTests: document.getElementById('active-tests'),
+        testedCount: document.getElementById('tested-count'),
+        successCount: document.getElementById('success-count'),
+        errorCount: document.getElementById('error-count'),
+        progressText: document.getElementById('progress-text'),
+        progressBar: document.getElementById('progress-bar'),
+        
+        // 状态显示元素
+        activeGroupsCount: document.getElementById('active-groups-count'),
+        todayTests: document.getElementById('today-tests'),
+        sentNotifications: document.getElementById('sent-notifications'),
+        totalDomains: document.getElementById('total-domains'),
+        
+        // 监控日志元素
+        monitorLog: document.getElementById('monitor-log')
+    };
+
+    // 状态变量
+    let groups = {};
+    let activeTestGroups = new Map(); // groupId -> test state
+    let selectedGroupId = null;
+    let isTesting = false;
+    let isPaused = false;
+    let stats = {
+        todayTests: 0,
+        sentNotifications: 0,
+        totalDomains: 0,
+        lastReset: new Date().toDateString()
+    };
+
+    // 消息处理器
+    window.messageHandlers = new Map();
+
+    // 初始化
+    function init() {
+        loadGroups();
+        loadStats();
+        setupEventListeners();
+        updateGroupList();
+        updateStatsDisplay();
+        
+        // 监听来自ITDOG页面的消息
+        window.addEventListener('message', handleITDOGMessage);
+        
+        addLog('🎉 多群监控系统 v9.0 已启动', 'success');
+        addLog('📤 每次测试完立即发送结果到对应群组', 'info');
+        addLog('👥 支持多群独立配置和监控', 'info');
+        
+        // 检查是否需要重置每日统计
+        checkDailyReset();
+    }
+
+    // 加载群组配置
+    function loadGroups() {
+        try {
+            const savedGroups = localStorage.getItem('monitor_groups_v9');
+            if (savedGroups) {
+                groups = JSON.parse(savedGroups);
+                updateTotalDomains();
+            }
+        } catch (error) {
+            console.error('加载群组配置失败:', error);
+            addLog('❌ 加载群组配置失败', 'error');
+        }
+    }
+
+    // 保存群组配置
+    function saveGroups() {
+        try {
+            localStorage.setItem('monitor_groups_v9', JSON.stringify(groups));
+            updateTotalDomains();
+            return true;
+        } catch (error) {
+            console.error('保存群组配置失败:', error);
+            addLog('❌ 保存群组配置失败', 'error');
+            return false;
+        }
+    }
+
+    // 加载统计数据
+    function loadStats() {
+        try {
+            const savedStats = localStorage.getItem('monitor_stats_v9');
+            if (savedStats) {
+                const loadedStats = JSON.parse(savedStats);
+                if (loadedStats.lastReset === new Date().toDateString()) {
+                    stats = loadedStats;
+                } else {
+                    resetDailyStats();
+                }
+            }
+        } catch (error) {
+            console.error('加载统计数据失败:', error);
+        }
+    }
+
+    // 保存统计数据
+    function saveStats() {
+        try {
+            localStorage.setItem('monitor_stats_v9', JSON.stringify(stats));
+        } catch (error) {
+            console.error('保存统计数据失败:', error);
+        }
+    }
+
+    // 更新总域名数
+    function updateTotalDomains() {
+        stats.totalDomains = 0;
+        Object.values(groups).forEach(group => {
+            stats.totalDomains += group.domains.length;
+        });
+        updateStatsDisplay();
+    }
+
+    // 检查每日重置
+    function checkDailyReset() {
+        if (stats.lastReset !== new Date().toDateString()) {
+            resetDailyStats();
+            addLog('📅 新的一天，统计已重置', 'info');
+        }
+    }
+
+    // 重置每日统计
+    function resetDailyStats() {
+        stats.todayTests = 0;
+        stats.sentNotifications = 0;
+        stats.lastReset = new Date().toDateString();
+        saveStats();
+        updateStatsDisplay();
+    }
+
+    // 设置事件监听器
+    function setupEventListeners() {
+        // 保存群组
+        elements.saveGroupBtn.addEventListener('click', saveGroup);
+        elements.clearFormBtn.addEventListener('click', clearForm);
+        elements.deleteGroupBtn.addEventListener('click', deleteGroup);
+        
+        // 测试控制
+        elements.startAllBtn.addEventListener('click', startAllGroups);
+        elements.startSelectedBtn.addEventListener('click', startSelectedGroup);
+        elements.stopAllBtn.addEventListener('click', stopAllGroups);
+        elements.testNowBtn.addEventListener('click', testSelectedGroupOnce);
+        elements.pauseBtn.addEventListener('click', togglePause);
+        elements.stopBtn.addEventListener('click', stopAllTests);
+    }
+
+    // 保存群组
+    function saveGroup() {
+        const groupName = elements.groupName.value.trim();
+        const botToken = elements.botToken.value.trim();
+        const chatId = elements.chatId.value.trim();
+        const mentionUsers = elements.mentionUsers.value.trim();
+        const threshold = parseInt(elements.connectivityThreshold.value) || 90;
+        const domains = elements.groupDomains.value.trim();
+        const interval = parseInt(elements.testInterval.value) || 60;
+        
+        // 验证
+        if (!groupName || !botToken || !chatId || !domains) {
+            showStatus('请填写所有必填字段', 'error');
+            return;
+        }
+        
+        if (!botToken.match(/^\d+:[A-Za-z0-9_-]+$/)) {
+            showStatus('Bot Token格式不正确', 'error');
+            return;
+        }
+        
+        const domainList = domains.split('\n')
+            .map(d => d.trim())
+            .filter(d => d.length > 0);
+        
+        if (domainList.length === 0) {
+            showStatus('请至少输入一个测试链接', 'error');
+            return;
+        }
+        
+        // 处理用户ID（转换为数字数组）
+        const mentionUserIds = mentionUsers.split(',')
+            .map(u => u.trim())
+            .filter(u => u.match(/^\d+$/))
+            .map(u => parseInt(u));
+        
+        const groupId = selectedGroupId || Date.now().toString();
+        
+        // 保存群组
+        groups[groupId] = {
+            id: groupId,
+            name: groupName,
+            botToken: botToken,
+            chatId: chatId,
+            mentionUsers: mentionUserIds,
+            threshold: threshold,
+            domains: domainList,
+            interval: interval,
+            enabled: true,
+            lastTested: null,
+            lastResult: null,
+            createdAt: new Date().toISOString()
+        };
+        
+        if (saveGroups()) {
+            showStatus(`群组 "${groupName}" 已保存`, 'success');
+            addLog(`✅ 群组已保存: ${groupName} (${domainList.length}个链接)`, 'success');
+            
+            // 更新显示
+            updateGroupList();
+            clearForm();
+            
+            // 如果正在编辑，可能需要更新测试状态
+            if (selectedGroupId && activeTestGroups.has(selectedGroupId)) {
+                const testState = activeTestGroups.get(selectedGroupId);
+                testState.group = groups[groupId]; // 更新群组配置
+            }
+        }
+    }
+
+    // 清除表单
+    function clearForm() {
+        elements.groupName.value = '';
+        elements.botToken.value = '';
+        elements.chatId.value = '';
+        elements.mentionUsers.value = '';
+        elements.connectivityThreshold.value = '90';
+        elements.groupDomains.value = '';
+        elements.testInterval.value = '60';
+        selectedGroupId = null;
+        elements.deleteGroupBtn.style.display = 'none';
+        elements.saveGroupBtn.innerHTML = '<i class="fas fa-save"></i> 保存群组';
+        
+        // 清除选中状态
+        document.querySelectorAll('.group-item.active').forEach(item => {
+            item.classList.remove('active');
+        });
+    }
+
+    // 删除群组
+    function deleteGroup() {
+        if (!selectedGroupId) return;
+        
+        const group = groups[selectedGroupId];
+        if (!group) return;
+        
+        if (confirm(`确定要删除群组 "${group.name}" 吗？`)) {
+            // 如果正在测试，先停止
+            if (activeTestGroups.has(selectedGroupId)) {
+                stopGroupTest(selectedGroupId);
+            }
+            
+            // 删除群组
+            delete groups[selectedGroupId];
+            saveGroups();
+            
+            showStatus(`群组 "${group.name}" 已删除`, 'success');
+            addLog(`🗑️ 已删除群组: ${group.name}`, 'warning');
+            
+            // 更新显示
+            updateGroupList();
+            clearForm();
+        }
+    }
+
+    // 更新群组列表显示
+    function updateGroupList() {
+        elements.groupList.innerHTML = '';
+        
+        Object.values(groups).forEach(group => {
+            const item = document.createElement('div');
+            item.className = 'group-item';
+            if (selectedGroupId === group.id) {
+                item.classList.add('active');
+            }
+            item.dataset.groupId = group.id;
+            
+            const isActive = activeTestGroups.has(group.id);
+            const activeStatus = isActive ? '🟢 运行中' : '⚪ 未运行';
+            
+            item.innerHTML = `
+                <div class="group-header">
+                    <span class="group-name">${group.name}</span>
+                    <div class="group-buttons">
+                        <button class="group-btn edit" title="编辑">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="group-btn delete" title="删除">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button class="group-btn ${group.enabled ? 'disable' : 'enable'}" title="${group.enabled ? '禁用' : '启用'}">
+                            <i class="fas fa-${group.enabled ? 'pause' : 'play'}"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="group-details">
+                    <div><i class="fas fa-hashtag"></i> 链接: ${group.domains.length}个</div>
+                    <div><i class="fas fa-clock"></i> 间隔: ${group.interval}分钟</div>
+                    <div><i class="fas fa-bell"></i> 阈值: ${group.threshold}%</div>
+                    <div><i class="fas fa-users"></i> 通知: ${group.mentionUsers.length}人</div>
+                    <div><i class="fas fa-power-off"></i> 状态: ${activeStatus}</div>
+                    ${group.lastTested ? `<div><i class="fas fa-history"></i> 最后: ${new Date(group.lastTested).toLocaleTimeString()}</div>` : ''}
+                </div>
+            `;
+            
+            elements.groupList.appendChild(item);
+            
+            // 添加点击事件（选中群组）
+            item.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('group-btn')) {
+                    selectGroup(group.id);
+                }
+            });
+            
+            // 添加按钮事件
+            item.querySelector('.edit').addEventListener('click', (e) => {
+                e.stopPropagation();
+                editGroup(group.id);
+            });
+            item.querySelector('.delete').addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (confirm(`删除群组 "${group.name}"？`)) {
+                    deleteGroupById(group.id);
+                }
+            });
+            item.querySelector('.group-btn:not(.edit):not(.delete)').addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleGroupEnabled(group.id);
+            });
+        });
+    }
+
+    // 选中群组
+    function selectGroup(groupId) {
+        selectedGroupId = groupId;
+        
+        // 更新UI
+        document.querySelectorAll('.group-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        const selectedItem = document.querySelector(`.group-item[data-group-id="${groupId}"]`);
+        if (selectedItem) {
+            selectedItem.classList.add('active');
+        }
+        
+        // 显示删除按钮
+        elements.deleteGroupBtn.style.display = 'block';
+        
+        addLog(`📌 选中群组: ${groups[groupId]?.name || '未知'}`, 'info');
+    }
+
+    // 编辑群组
+    function editGroup(groupId) {
+        const group = groups[groupId];
+        if (!group) return;
+        
+        selectedGroupId = groupId;
+        
+        // 填充表单
+        elements.groupName.value = group.name;
+        elements.botToken.value = group.botToken;
+        elements.chatId.value = group.chatId;
+        elements.mentionUsers.value = group.mentionUsers.join(', ');
+        elements.connectivityThreshold.value = group.threshold;
+        elements.groupDomains.value = group.domains.join('\n');
+        elements.testInterval.value = group.interval;
+        
+        // 更新按钮
+        elements.deleteGroupBtn.style.display = 'block';
+        elements.saveGroupBtn.innerHTML = '<i class="fas fa-sync-alt"></i> 更新群组';
+        
+        addLog(`✏️ 正在编辑群组: ${group.name}`, 'info');
+    }
+
+    // 删除群组（通过ID）
+    function deleteGroupById(groupId) {
+        const group = groups[groupId];
+        if (!group) return;
+        
+        // 如果正在测试，先停止
+        if (activeTestGroups.has(groupId)) {
+            stopGroupTest(groupId);
+        }
+        
+        // 删除群组
+        delete groups[groupId];
+        saveGroups();
+        
+        showStatus(`群组 "${group.name}" 已删除`, 'success');
+        addLog(`🗑️ 已删除群组: ${group.name}`, 'warning');
+        
+        // 如果删除的是选中的群组，清空表单
+        if (selectedGroupId === groupId) {
+            clearForm();
+        }
+        
+        // 更新显示
+        updateGroupList();
+    }
+
+    // 启用/禁用群组
+    function toggleGroupEnabled(groupId) {
+        const group = groups[groupId];
+        if (!group) return;
+        
+        group.enabled = !group.enabled;
+        saveGroups();
+        updateGroupList();
+        
+        const action = group.enabled ? '启用' : '禁用';
+        addLog(`⚙️ 已${action}群组: ${group.name}`, 'info');
+        
+        // 如果禁用时正在测试，停止测试
+        if (!group.enabled && activeTestGroups.has(groupId)) {
+            stopGroupTest(groupId);
+        }
+    }
+
+    // 启动所有群组
+    function startAllGroups() {
+        const enabledGroups = Object.values(groups).filter(g => g.enabled);
+        
+        if (enabledGroups.length === 0) {
+            showStatus('没有启用的群组', 'error');
+            return;
+        }
+        
+        let startedCount = 0;
+        enabledGroups.forEach(group => {
+            if (!activeTestGroups.has(group.id)) {
+                if (startGroupTest(group.id)) {
+                    startedCount++;
+                }
+            }
+        });
+        
+        showStatus(`已启动 ${startedCount} 个群组的监控`, 'success');
+        updateActiveGroupsCount();
+    }
+
+    // 启动选中群组
+    function startSelectedGroup() {
+        if (!selectedGroupId) {
+            showStatus('请先选择一个群组', 'error');
+            return;
+        }
+        
+        if (!groups[selectedGroupId].enabled) {
+            showStatus('该群组已被禁用', 'error');
+            return;
+        }
+        
+        if (activeTestGroups.has(selectedGroupId)) {
+            showStatus('该群组已在运行中', 'info');
+            return;
+        }
+        
+        if (startGroupTest(selectedGroupId)) {
+            showStatus('群组监控已启动', 'success');
+            updateActiveGroupsCount();
+        }
+    }
+
+    // 测试选中群组一次（不启动定时）
+    function testSelectedGroupOnce() {
+        if (!selectedGroupId) {
+            showStatus('请先选择一个群组', 'error');
+            return;
+        }
+        
+        const group = groups[selectedGroupId];
+        if (!group || !group.enabled) {
+            showStatus('群组不可用或已被禁用', 'error');
+            return;
+        }
+        
+        addLog(`🚀 立即测试群组: ${group.name}`, 'info');
+        
+        // 创建一次性测试状态
+        const testState = {
+            groupId: selectedGroupId,
+            group: group,
+            domains: [...group.domains],
+            currentIndex: 0,
+            isTesting: true,
+            isOneTime: true, // 标记为一次性测试
+            results: {},
+            activeTabs: new Map()
+        };
+        
+        activeTestGroups.set(selectedGroupId, testState);
+        updateActiveGroupsCount();
+        showTestControls();
+        
+        // 开始测试
+        testNextDomain(selectedGroupId);
+    }
+
+    // 启动单个群组测试
+    function startGroupTest(groupId) {
+        const group = groups[groupId];
+        if (!group || !group.enabled) return false;
+        
+        addLog(`🚀 启动群组测试: ${group.name}`, 'info');
+        
+        // 如果已经在测试中，先停止
+        if (activeTestGroups.has(groupId)) {
+            stopGroupTest(groupId);
+        }
+        
+        // 创建测试状态
+        const testState = {
+            groupId: groupId,
+            group: group,
+            domains: [...group.domains],
+            currentIndex: 0,
+            isTesting: true,
+            isOneTime: false, // 定时测试
+            results: {},
+            activeTabs: new Map(),
+            timer: null,
+            interval: group.interval * 60 * 1000 // 转换为毫秒
+        };
+        
+        activeTestGroups.set(groupId, testState);
+        updateActiveGroupsCount();
+        showTestControls();
+        
+        // 开始第一次测试
+        testNextDomain(groupId);
+        
+        // 设置定时器（如果不是一次性测试）
+        if (!testState.isOneTime && group.interval > 0) {
+            testState.timer = setInterval(() => {
+                if (testState.isTesting && !isPaused) {
+                    addLog(`🔄 定时测试: ${group.name}`, 'info');
+                    testState.currentIndex = 0;
+                    testState.results = {};
+                    testNextDomain(groupId);
+                }
+            }, testState.interval);
+        }
+        
+        return true;
+    }
+
+    // 停止单个群组测试
+    function stopGroupTest(groupId) {
+        const testState = activeTestGroups.get(groupId);
+        if (!testState) return;
+        
+        testState.isTesting = false;
+        
+        // 清除定时器
+        if (testState.timer) {
+            clearInterval(testState.timer);
+            testState.timer = null;
+        }
+        
+        // 关闭所有打开的标签页
+        testState.activeTabs.forEach(tab => {
+            try {
+                if (tab && !tab.closed) {
+                    tab.close();
+                }
+            } catch (e) {
+                console.error('关闭标签页失败:', e);
+            }
+        });
+        testState.activeTabs.clear();
+        
+        // 从活动列表移除
+        activeTestGroups.delete(groupId);
+        updateActiveGroupsCount();
+        
+        const group = groups[groupId];
+        if (group) {
+            addLog(`⏹️ 停止群组测试: ${group.name}`, 'warning');
+        }
+        
+        // 如果没有活动的测试，隐藏控制面板
+        if (activeTestGroups.size === 0) {
+            hideTestControls();
+        }
+    }
+
+    // 停止所有群组
+    function stopAllGroups() {
+        activeTestGroups.forEach((testState, groupId) => {
+            stopGroupTest(groupId);
+        });
+        
+        showStatus('已停止所有群组的监控', 'info');
+        hideTestControls();
+    }
+
+    // 测试下一个域名
+    function testNextDomain(groupId) {
+        const testState = activeTestGroups.get(groupId);
+        if (!testState || !testState.isTesting || testState.currentIndex >= testState.domains.length) {
+            // 测试完成
+            if (testState) {
+                testState.isTesting = false;
+                testState.currentIndex = 0; // 重置索引
+                
+                // 更新群组最后测试时间
+                const group = groups[groupId];
+                if (group) {
+                    group.lastTested = new Date().toISOString();
+                    saveGroups();
+                    updateGroupList();
+                    
+                    // 如果不是一次性测试，等待下一次定时执行
+                    if (!testState.isOneTime) {
+                        addLog(`✅ 群组测试完成: ${group.name}，等待下一次定时`, 'success');
+                    } else {
+                        addLog(`✅ 一次性测试完成: ${group.name}`, 'success');
+                        // 一次性测试完成，移除
+                        setTimeout(() => {
+                            activeTestGroups.delete(groupId);
+                            updateActiveGroupsCount();
+                        }, 1000);
+                    }
+                }
+            }
+            return;
+        }
+        
+        const domain = testState.domains[testState.currentIndex];
+        const domainIndex = testState.currentIndex;
+        
+        testState.currentIndex++;
+        updateTestProgress();
+        
+        // 打开ITDOG页面进行测试
+        openITDOGTest(groupId, domain, domainIndex);
+        
+        // 如果没有暂停，继续测试下一个（延迟打开，避免同时打开太多页面）
+        if (!isPaused) {
+            setTimeout(() => {
+                if (testState && testState.isTesting) {
+                    testNextDomain(groupId);
+                }
+            }, 5000); // 5秒间隔
+        }
+    }
+
+    // 打开ITDOG测试页面
+    function openITDOGTest(groupId, domain, index) {
+        try {
+            // 清理域名格式
+            let cleanDomain = domain.trim();
+            if (!cleanDomain.startsWith('http://') && !cleanDomain.startsWith('https://')) {
+                cleanDomain = 'http://' + cleanDomain;
+            }
+            
+            const encodedDomain = encodeURIComponent(cleanDomain);
+            const url = `https://www.itdog.cn/http/?domain=${encodedDomain}`;
+            
+            // 生成唯一窗口名
+            const windowName = `itdog_${groupId}_${index}_${Date.now()}`;
+            
+            // 打开新窗口
+            const win = window.open(url, windowName, 'width=1200,height=800,menubar=no,toolbar=no,location=yes');
+            
+            if (!win) {
+                addLog(`❌ 无法打开标签页: ${cleanDomain} (可能被浏览器阻止)`, 'error');
+                
+                // 标记测试失败
+                const testState = activeTestGroups.get(groupId);
+                if (testState) {
+                    testState.results[index] = {
+                        status: 'error',
+                        domain: cleanDomain,
+                        rate: 0
+                    };
+                    updateTestStats(false);
+                }
+                return;
+            }
+            
+            // 保存窗口引用
+            const testState = activeTestGroups.get(groupId);
+            if (testState) {
+                testState.activeTabs.set(index, win);
+                
+                // 设置消息处理器
+                const messageHandler = (event) => {
+                    if (event.data && event.data.type === 'ITDOG_TEST_RESULT') {
+                        handleTestResult(event.data, groupId, cleanDomain, index);
+                        // 移除监听器
+                        win.removeEventListener('message', messageHandler);
+                    }
+                };
+                
+                // 添加消息监听
+                win.addEventListener('message', messageHandler);
+                
+                // 设置超时检查
+                setTimeout(() => {
+                    try {
+                        if (win.closed) {
+                            addLog(`⏰ 标签页已关闭: ${cleanDomain}`, 'info');
+                        } else {
+                            // 发送Ping消息检查脚本状态
+                            win.postMessage({ type: 'PING_ITDOG' }, '*');
+                        }
+                    } catch (e) {
+                        // 跨域错误，忽略
+                    }
+                    
+                    // 清理引用
+                    if (testState.activeTabs) {
+                        testState.activeTabs.delete(index);
+                    }
+                }, 180000); // 3分钟超时
+            }
+            
+            stats.todayTests++;
+            updateStatsDisplay();
+            saveStats();
+            
+            addLog(`🌐 打开测试: ${cleanDomain}`, 'info');
+            
+        } catch (error) {
+            addLog(`❌ 打开测试页面出错: ${error.message}`, 'error');
+        }
+    }
+
+    // 处理测试结果
+    function handleTestResult(resultData, groupId, domain, index) {
+        const testState = activeTestGroups.get(groupId);
+        const group = groups[groupId];
+        
+        if (!testState || !group) return;
+        
+        // 保存结果
+        testState.results[index] = {
+            status: resultData.isLowRate ? 'lowrate' : 'success',
+            domain: domain,
+            rate: resultData.connectivityRate || 0,
+            data: resultData
+        };
+        
+        // 更新统计
+        updateTestStats(!resultData.isLowRate);
+        
+        // 记录到群组
+        group.lastResult = {
+            domain: domain,
+            rate: resultData.connectivityRate || 0,
+            time: new Date().toISOString(),
+            isLowRate: resultData.isLowRate || false
+        };
+        saveGroups();
+        updateGroupList();
+        
+        // 发送结果到Telegram
+        sendResultToTelegram(group, domain, resultData);
+        
+        // 关闭标签页
+        const tab = testState.activeTabs.get(index);
+        if (tab && !tab.closed) {
+            try {
+                tab.close();
+            } catch (e) {
+                // 忽略错误
+            }
+        }
+        testState.activeTabs.delete(index);
+        
+        // 更新进度
+        updateTestProgress();
+    }
+
+    // 发送结果到Telegram
+    async function sendResultToTelegram(group, domain, resultData) {
+        const now = new Date();
+        const currentTime = now.toLocaleString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        }).replace(/\//g, '-');
+        
+        const isLowRate = resultData.isLowRate || false;
+        const rate = resultData.connectivityRate || 0;
+        const statusEmoji = isLowRate ? '⚠️' : '✅';
+        
+        // 构建消息
+        let message = `${statusEmoji} *网站监控结果 - ${group.name}*\n\n`;
+        message += `🌐 *检测域名:* \`${domain}\`\n`;
+        message += `🕐 *检测时间:* ${currentTime}\n`;
+        message += `📊 *连通率:* ${rate}%\n`;
+        message += `✅ *成功节点:* ${resultData.success200Tests || 0}/${resultData.totalTests || 0}\n\n`;
+        
+        // 运营商分析
+        if (resultData.operatorSummary) {
+            const summary = resultData.operatorSummary;
+            message += `📡 *运营商分析*\n`;
+            
+            if (summary.mobileTotal > 0) {
+                message += `├ 中国移动: ${summary.mobileSuccess || 0}/${summary.mobileTotal} (${summary.mobileRate || 0}%)\n`;
+            }
+            if (summary.unicomTotal > 0) {
+                message += `├ 中国联通: ${summary.unicomSuccess || 0}/${summary.unicomTotal} (${summary.unicomRate || 0}%)\n`;
+            }
+            if (summary.telecomTotal > 0) {
+                message += `├ 中国电信: ${summary.telecomSuccess || 0}/${summary.telecomTotal} (${summary.telecomRate || 0}%)\n`;
+            }
+            
+            const totalErrors = (summary.mobileErrors || 0) + (summary.unicomErrors || 0) + (summary.telecomErrors || 0) + (summary.otherErrors || 0);
+            if (totalErrors > 0) {
+                message += `├ 异常总数: ${totalErrors}个\n`;
+                if (summary.mobileErrors > 0) message += `│  ├ 移动异常: ${summary.mobileErrors}个\n`;
+                if (summary.unicomErrors > 0) message += `│  ├ 联通异常: ${summary.unicomErrors}个\n`;
+                if (summary.telecomErrors > 0) message += `│  ├ 电信异常: ${summary.telecomErrors}个\n`;
+                if (summary.otherErrors > 0) message += `│  └ 其他异常: ${summary.otherErrors}个\n`;
+            }
+            message += '\n';
+        }
+        
+        // 异常时@相关人员
+        if (isLowRate && group.mentionUsers.length > 0) {
+            const mentions = group.mentionUsers.map(userId => `[${userId}](tg://user?id=${userId})`).join(' ');
+            message += `📢 *异常通知:* ${mentions}\n`;
+            message += `⚠️ *告警:* 连通率低于${group.threshold}%！\n\n`;
+        }
+        
+        message += `🔗 *测试链接:* https://www.itdog.cn/http/?domain=${encodeURIComponent(domain)}\n`;
+        
+        try {
+            // 发送消息
+            const response = await sendTelegramMessage(group.botToken, group.chatId, message);
+            
+            if (response.ok) {
+                stats.sentNotifications++;
+                updateStatsDisplay();
+                saveStats();
+                
+                const logMsg = isLowRate ? `⚠️ 异常结果已发送到群组: ${group.name}` : `✅ 结果已发送到群组: ${group.name}`;
+                addLog(logMsg, isLowRate ? 'warning' : 'success');
+                
+                return true;
+            } else {
+                throw new Error(response.description || '发送失败');
+            }
+        } catch (error) {
+            addLog(`❌ 发送结果失败: ${error.message}`, 'error');
+            return false;
+        }
+    }
+
+    // 发送Telegram消息
+    async function sendTelegramMessage(botToken, chatId, text) {
+        const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                chat_id: chatId,
+                text: text,
+                parse_mode: 'Markdown',
+                disable_web_page_preview: true
+            })
+        });
+        
+        return await response.json();
+    }
+
+    // 处理ITDOG页面消息
+    function handleITDOGMessage(event) {
+        // 只处理来自ITDOG域名的消息
+        if (event.origin !== 'https://www.itdog.cn' && event.origin !== 'http://www.itdog.cn') {
+            return;
+        }
+        
+        if (event.data && event.data.type === 'ITDOG_TEST_RESULT') {
+            console.log('📩 收到ITDOG测试结果:', event.data);
+            
+            // 这里可以通过消息处理器路由到对应的群组处理
+            // 但由于跨域限制，通常由测试页面直接发送结果
+        }
+    }
+
+    // 显示测试控制面板
+    function showTestControls() {
+        if (!isTesting) {
+            isTesting = true;
+            elements.testControls.style.display = 'block';
+        }
+    }
+
+    // 隐藏测试控制面板
+    function hideTestControls() {
+        if (isTesting && activeTestGroups.size === 0) {
+            isTesting = false;
+            elements.testControls.style.display = 'none';
+        }
+    }
+
+    // 更新活跃群组数
+    function updateActiveGroupsCount() {
+        const activeCount = Array.from(activeTestGroups.values()).filter(t => t.isTesting).length;
+        elements.activeGroupsCount.textContent = activeCount;
+    }
+
+    // 更新测试进度
+    function updateTestProgress() {
+        let totalDomains = 0;
+        let testedDomains = 0;
+        let successDomains = 0;
+        let errorDomains = 0;
+        
+        activeTestGroups.forEach(testState => {
+            if (testState.isTesting) {
+                totalDomains += testState.domains.length;
+                testedDomains += testState.currentIndex;
+                
+                // 统计成功和失败
+                Object.values(testState.results).forEach(result => {
+                    if (result.status === 'success') {
+                        successDomains++;
+                    } else if (result.status === 'lowrate' || result.status === 'error') {
+                        errorDomains++;
+                    }
+                });
+            }
+        });
+        
+        elements.activeTests.textContent = activeTestGroups.size;
+        elements.testedCount.textContent = testedDomains;
+        elements.successCount.textContent = successDomains;
+        elements.errorCount.textContent = errorDomains;
+        elements.progressText.textContent = `${testedDomains}/${totalDomains}`;
+        elements.progressBar.style.width = totalDomains > 0 ? `${(testedDomains / totalDomains) * 100}%` : '0%';
+    }
+
+    // 更新测试统计
+    function updateTestStats(isSuccess) {
+        // 这里可以添加额外的统计逻辑
+        updateTestProgress();
+    }
+
+    // 切换暂停状态
+    function togglePause() {
+        isPaused = !isPaused;
+        
+        if (isPaused) {
+            elements.pauseBtn.innerHTML = '<i class="fas fa-play"></i> 继续';
+            addLog('⏸️ 所有测试已暂停', 'warning');
+        } else {
+            elements.pauseBtn.innerHTML = '<i class="fas fa-pause"></i> 暂停';
+            addLog('▶️ 所有测试已继续', 'success');
+            
+            // 继续所有测试
+            activeTestGroups.forEach((testState, groupId) => {
+                if (testState.isTesting) {
+                    testNextDomain(groupId);
+                }
+            });
+        }
+    }
+
+    // 停止所有测试
+    function stopAllTests() {
+        isPaused = false;
+        
+        activeTestGroups.forEach((testState, groupId) => {
+            stopGroupTest(groupId);
+        });
+        
+        hideTestControls();
+        addLog('⏹️ 所有测试已停止', 'warning');
+    }
+
+    // 更新统计显示
+    function updateStatsDisplay() {
+        elements.todayTests.textContent = stats.todayTests;
+        elements.sentNotifications.textContent = stats.sentNotifications;
+        elements.totalDomains.textContent = stats.totalDomains;
+    }
+
+    // 显示状态消息
+    function showStatus(message, type) {
+        elements.configStatus.textContent = message;
+        elements.configStatus.className = 'status-message';
+        
+        if (type === 'success') {
+            elements.configStatus.classList.add('status-success');
+        } else if (type === 'error') {
+            elements.configStatus.classList.add('status-error');
+        }
+        
+        elements.configStatus.style.display = 'block';
+        
+        setTimeout(() => {
+            elements.configStatus.style.display = 'none';
+        }, 3000);
+    }
+
+    // 添加日志
+    function addLog(message, type = 'info') {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('zh-CN', { hour12: false });
+        
+        const logEntry = document.createElement('div');
+        logEntry.className = 'log-entry';
+        
+        let icon = '📝';
+        if (type === 'success') icon = '✅';
+        if (type === 'error') icon = '❌';
+        if (type === 'warning') icon = '⚠️';
+        if (type === 'info') icon = 'ℹ️';
+        
+        logEntry.innerHTML = `
+            <span class="log-time">${timeString}</span>
+            <span class="log-content">${icon} ${message}</span>
+        `;
+        
+        elements.monitorLog.appendChild(logEntry);
+        elements.monitorLog.scrollTop = elements.monitorLog.scrollHeight;
+        
+        // 限制日志数量
+        const logEntries = elements.monitorLog.querySelectorAll('.log-entry');
+        if (logEntries.length > 200) {
+            for (let i = 0; i < logEntries.length - 200; i++) {
+                logEntries[i].remove();
+            }
+        }
+    }
+
+    // 初始化应用
+    init();
+});
+</script>
+</body>
+</html>
+
+你这个代码检测完也不会截图发送到飞机啊  以下是tampermonkey.net脚本 给我修改后的完整代码 要可以使用的不是模拟
+
+// ==UserScript==
+// @name         ITDOG网站测速监控 v8.1 - 运营商节点分析版
+// @namespace    http://tampermonkey.net/
+// @version      8.1
+// @description  自动提取域名、取消港澳台选项、点击开始测试、监控连通率并返回结果给主页面，新增运营商节点分析功能
+// @author       ITDOG监控系统
+// @match        https://www.itdog.cn/*
+// @run-at       document-end
+// @grant        GM_addStyle
+// @grant        GM_setValue
+// @grant        GM_getValue
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // ====== 防重复执行检查 ======
+    if (window.itdogMonitorRunningV81) {
+        console.log('🚫 ITDOG监控脚本已在运行中，禁止重复执行');
+        return;
+    }
+    window.itdogMonitorRunningV81 = true;
+
+    console.log('🚀 ITDOG监控脚本启动 - 运营商节点分析版 v8.1');
+
+    // 配置
+    const CONFIG = {
+        maxChecks: 60,           // 监控次数
+        checkInterval: 2000,     // 检查间隔2秒
+        minSuccessRate: 90,      // 最低连通率
+        minTotalTests: 8,        // 最少检测节点数
+        timeout: 150000,         // 2.5分钟超时
+        waitAfterClick: 5000,    // 点击后等待5秒
+        stableThreshold: 3,      // 稳定次数阈值
+        sessionKey: 'itdog_monitor_state_81' // session存储键名
+    };
+
+    // 全局状态标记
+    let hasProcessed = false;
+    let testStarted = false;
+    let testReallyStarted = false;
+    let monitoringStarted = false;
+    let resultsSent = false;
+    let monitoringInterval = null;
+    let checkCount = 0;
+    let clickTime = 0;
+    let currentStage = 'initial';
+
+    // ==================== 运营商识别函数 ====================
+    function identifyOperator(nodeText) {
+        if (!nodeText) return 'other';
+
+        const text = nodeText.toLowerCase();
+
+        if (text.includes('移动') || text.includes('cmcc') || text.includes('chinamobile')) {
+            return 'mobile';
+        } else if (text.includes('联通') || text.includes('unicom') || text.includes('chinaunicom')) {
+            return 'unicom';
+        } else if (text.includes('电信') || text.includes('telecom') || text.includes('chinatelecom')) {
+            return 'telecom';
+        } else if (text.includes('bgp') || text.includes('多线')) {
+            return 'bgp';
+        } else if (text.includes('教育网') || text.includes('cernet')) {
+            return 'edu';
+        } else if (text.includes('铁通') || text.includes('tietong')) {
+            return 'tietong';
+        } else if (text.includes('长城') || text.includes('greatwall')) {
+            return 'greatwall';
+        } else {
+            return 'other';
+        }
+    }
+
+    // ==================== 状态管理 ====================
+    class StateManager {
+        constructor() {
+            this.stateKey = CONFIG.sessionKey;
+            this.clearOldSessions();
+        }
+
+        getState() {
+            try {
+                const stateStr = sessionStorage.getItem(this.stateKey);
+                return stateStr ? JSON.parse(stateStr) : null;
+            } catch (e) {
+                console.log('获取状态失败:', e);
+                return null;
+            }
+        }
+
+        setState(state) {
+            try {
+                const stateData = {
+                    ...state,
+                    timestamp: Date.now(),
+                    version: '8.1'
+                };
+                sessionStorage.setItem(this.stateKey, JSON.stringify(stateData));
+                console.log('💾 状态已保存:', stateData.stage);
+                return true;
+            } catch (e) {
+                console.log('保存状态失败:', e);
+                return false;
+            }
+        }
+
+        clearState() {
+            try {
+                sessionStorage.removeItem(this.stateKey);
+                console.log('🗑️ 状态已清除');
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        clearOldSessions() {
+            try {
+                const allKeys = Object.keys(sessionStorage);
+                allKeys.forEach(key => {
+                    if (key.startsWith('itdog_') && key !== this.stateKey) {
+                        sessionStorage.removeItem(key);
+                    }
+                });
+            } catch (e) {
+                // 忽略错误
+            }
+        }
+
+        isPageRefreshed() {
+            const state = this.getState();
+            if (!state) return false;
+
+            const timeDiff = Date.now() - state.timestamp;
+            if (timeDiff > 10 * 60 * 1000) {
+                this.clearState();
+                return false;
+            }
+
+            return state.stage === 'monitoring' || state.stage === 'post_refresh';
+        }
+
+        updateStage(stage, data = {}) {
+            currentStage = stage;
+            const state = this.getState() || {};
+
+            const newState = {
+                ...state,
+                stage: stage,
+                ...data,
+                pageUrl: window.location.href,
+                timestamp: Date.now()
+            };
+
+            this.setState(newState);
+            return newState;
+        }
+    }
+
+    // 创建状态管理器
+    const stateManager = new StateManager();
+
+    // ==================== 页面阶段判断 ====================
+    function detectPagePhase() {
+        console.log('🔍 检测页面阶段...');
+
+        const results = extractResults();
+        const hasTestResults = results.totalTests > 0;
+
+        const url = window.location.href;
+        const pageText = document.body.textContent.toLowerCase();
+
+        const isResultPage = hasTestResults ||
+                           pageText.includes('测试完成') ||
+                           pageText.includes('检测完成') ||
+                           pageText.includes('连通率') ||
+                           url.includes('/result/') ||
+                           url.includes('test_id=');
+
+        const startButton = findStartButton();
+        const hasStartButton = startButton !== null;
+
+        console.log(`📊 页面分析: 结果=${hasTestResults}, 开始按钮=${hasStartButton}, URL=${url}`);
+
+        if (stateManager.isPageRefreshed()) {
+            console.log('🔄 检测到页面刷新，继续监控');
+            return 'post_refresh';
+        } else if (isResultPage && !hasStartButton) {
+            console.log('📊 检测到结果页面，直接监控');
+            return 'monitoring';
+        } else if (hasStartButton) {
+            console.log('🚀 检测到开始页面，准备开始测试');
+            return 'pre_test';
+        } else {
+            console.log('❓ 未知页面状态');
+            return 'initial';
+        }
+    }
+
+    // ==================== 样式注入 ====================
+    function injectStyles() {
+        if (document.getElementById('itdog-monitor-styles')) {
+            return;
+        }
+
+        const style = document.createElement('style');
+        style.id = 'itdog-monitor-styles';
+        style.textContent = `
+            #itdog-monitor-status {
+                position: fixed !important;
+                top: 20px !important;
+                right: 20px !important;
+                background: rgba(0, 0, 0, 0.95) !important;
+                color: white !important;
+                padding: 15px 20px !important;
+                border-radius: 10px !important;
+                z-index: 999999 !important;
+                font-family: 'Microsoft YaHei', Arial, sans-serif !important;
+                font-size: 13px !important;
+                border: 2px solid #3498db !important;
+                box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5) !important;
+                min-width: 300px !important;
+                max-width: 400px !important;
+                backdrop-filter: blur(10px) !important;
+            }
+
+            #itdog-monitor-completion {
+                position: fixed !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                background: linear-gradient(135deg, #1a1a1a, #2c3e50) !important;
+                color: white !important;
+                padding: 40px !important;
+                border-radius: 20px !important;
+                z-index: 1000000 !important;
+                text-align: center !important;
+                width: 500px !important;
+                border: 3px solid #2ecc71 !important;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.8) !important;
+                animation: fadeInScale 0.5s ease-out !important;
+            }
+
+            @keyframes fadeInScale {
+                from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+                to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            }
+
+            .itdog-highlight {
+                box-shadow: 0 0 0 3px #f39c12 !important;
+                animation: pulse 2s infinite !important;
+                transition: all 0.3s ease !important;
+            }
+
+            @keyframes pulse {
+                0% { box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.7); }
+                50% { box-shadow: 0 0 0 6px rgba(243, 156, 18, 0.3); }
+                100% { box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.7); }
+            }
+
+            .itdog-input-filled {
+                background-color: rgba(46, 204, 113, 0.1) !important;
+                border-color: #2ecc71 !important;
+            }
+        `;
+        document.head.appendChild(style);
+        console.log('✅ 监控样式已注入');
+    }
+
+    // ==================== 获取域名 ====================
+    function getDomain() {
+        console.log('🔍 获取测试域名...');
+
+        try {
+            // 优先从状态中获取
+            const state = stateManager.getState();
+            if (state && state.domain) {
+                console.log('✅ 从状态获取域名:', state.domain);
+                return state.domain;
+            }
+
+            // 从URL参数获取
+            const urlParams = new URLSearchParams(window.location.search);
+            let domain = urlParams.get('domain');
+
+            if (domain) {
+                domain = decodeURIComponent(domain).trim();
+                console.log('✅ 从URL参数获取域名:', domain);
+                return domain;
+            }
+
+            // 从URL路径获取
+            const urlMatch = window.location.pathname.match(/\/(?:ping|http|tcp|ping_full)\/(.+)/);
+            if (urlMatch && urlMatch[1]) {
+                domain = decodeURIComponent(urlMatch[1]).trim();
+                console.log('✅ 从URL路径获取完整域名:', domain);
+                return domain;
+            }
+
+            // 从输入框获取
+            const inputs = document.querySelectorAll('input[type="text"], input[type="url"], input[placeholder*="域名"], input[placeholder*="网址"], input[placeholder*="URL"]');
+            for (const input of inputs) {
+                if (input && input.value) {
+                    let value = input.value.trim();
+                    if (value.length > 3) {
+                        console.log('✅ 从输入框获取完整域名:', value);
+                        return value;
+                    }
+                }
+            }
+
+            // 额外查找
+            const urlElements = document.querySelectorAll('[href*="://"], [data-url], [data-domain], [src*="://"]');
+            for (const element of urlElements) {
+                const url = element.getAttribute('href') ||
+                           element.getAttribute('data-url') ||
+                           element.getAttribute('data-domain') ||
+                           element.getAttribute('src');
+                if (url && (url.includes('://') || url.startsWith('http'))) {
+                    const trimmedUrl = url.trim();
+                    console.log('✅ 从元素属性获取完整域名:', trimmedUrl);
+                    return trimmedUrl;
+                }
+            }
+
+            // 查找页面文本中的URL
+            const urlRegex = /(https?:\/\/[^\s<>"']+(?:\/[^\s<>"']*)?)/g;
+            const pageText = document.body.textContent;
+            const matches = pageText.match(urlRegex);
+            if (matches && matches.length > 0) {
+                for (const match of matches) {
+                    if (match.length > 10 && !match.includes('itdog.cn') && !match.includes('.css') && !match.includes('.js')) {
+                        console.log('✅ 从页面文本获取完整域名:', match);
+                        return match.trim();
+                    }
+                }
+            }
+
+            // 查找表单中的隐藏字段
+            const hiddenInputs = document.querySelectorAll('input[type="hidden"]');
+            for (const input of hiddenInputs) {
+                const name = (input.name || '').toLowerCase();
+                const value = input.value || '';
+                if ((name.includes('url') || name.includes('domain')) && value.length > 5) {
+                    console.log('✅ 从隐藏字段获取域名:', value);
+                    return value.trim();
+                }
+            }
+
+            console.log('❌ 未找到域名');
+            return null;
+
+        } catch (error) {
+            console.log('获取域名失败:', error);
+            return null;
+        }
+    }
+
+    // ==================== 提取测试结果（运营商分析版） ====================
+    function extractResults() {
+        let totalTests = 0;
+        let success200Tests = 0;
+        let connectivityRate = 0;
+        let completed = false;
+        let hasResults = false;
+
+        // 新增：运营商统计
+        const operatorStats = {
+            mobile: { name: '中国移动', success: 0, total: 0, errors: [] },
+            unicom: { name: '中国联通', success: 0, total: 0, errors: [] },
+            telecom: { name: '中国电信', success: 0, total: 0, errors: [] },
+            bgp: { name: 'BGP多线', success: 0, total: 0, errors: [] },
+            other: { name: '其他网络', success: 0, total: 0, errors: [] }
+        };
+
+        try {
+            // 查找检测点表格
+            const tables = document.querySelectorAll('table');
+
+            for (const table of tables) {
+                const rows = table.querySelectorAll('tr');
+                if (rows.length < 2) continue;
+
+                const firstRow = rows[0].textContent.toLowerCase();
+                const secondRow = rows[1] ? rows[1].textContent.toLowerCase() : '';
+
+                const isTestTable = firstRow.includes('检测点') ||
+                                   firstRow.includes('节点') ||
+                                   firstRow.includes('location') ||
+                                   firstRow.includes('状态') ||
+                                   firstRow.includes('响应') ||
+                                   firstRow.includes('耗时') ||
+                                   firstRow.includes('ms') ||
+                                   secondRow.includes('ms') ||
+                                   secondRow.includes('成功') ||
+                                   secondRow.includes('失败');
+
+                if (isTestTable) {
+                    console.log('✅ 找到检测点表格，行数:', rows.length);
+
+                    for (let i = 1; i < rows.length; i++) {
+                        const row = rows[i];
+                        const cells = row.querySelectorAll('td');
+                        if (cells.length < 2) continue;
+
+                        totalTests++;
+                        hasResults = true;
+
+                        const rowText = row.textContent.toLowerCase();
+                        let isSuccess = false;
+
+                        // 提取节点名称（通常在第一列）
+                        const nodeName = cells[0]?.textContent?.trim() || '';
+                        const nodeOperator = identifyOperator(nodeName);
+
+                        // 识别状态
+                        let statusCode = 'unknown';
+                        let responseTime = 'unknown';
+
+                        // 尝试从单元格中提取状态码和响应时间
+                        for (let j = 1; j < cells.length; j++) {
+                            const cellText = cells[j].textContent.trim();
+
+                            // 检查状态码
+                            if (/^\d{3}$/.test(cellText) || cellText.includes('200') || cellText.includes('404') || cellText.includes('502')) {
+                                statusCode = cellText;
+                            }
+
+                            // 检查响应时间
+                            if (cellText.includes('ms') || cellText.includes('毫秒')) {
+                                responseTime = cellText;
+                            }
+                        }
+
+                        // 判断是否成功
+                        if (rowText.includes('200') || statusCode === '200') {
+                            isSuccess = true;
+                        } else if (rowText.includes('成功') ||
+                                 rowText.includes('正常') ||
+                                 rowText.includes('连通') ||
+                                 rowText.includes('ok') ||
+                                 rowText.includes('success')) {
+                            isSuccess = true;
+                        } else if (row.querySelector('.text-success, .success, [style*="color:green"], [style*="color:#"]')) {
+                            const color = window.getComputedStyle(row).color;
+                            if (color.includes('rgb(0, 128, 0)') || color.includes('#008000') || color.includes('#00') || color.includes('rgb(46, 204, 113)')) {
+                                isSuccess = true;
+                            }
+                        }
+
+                        // 统计运营商数据
+                        operatorStats[nodeOperator].total++;
+                        if (isSuccess) {
+                            success200Tests++;
+                            operatorStats[nodeOperator].success++;
+                        } else {
+                            // 记录错误详情
+                            operatorStats[nodeOperator].errors.push({
+                                nodeName: nodeName,
+                                operator: operatorStats[nodeOperator].name,
+                                statusCode: statusCode,
+                                responseTime: responseTime,
+                                rowIndex: i,
+                                rawText: rowText.substring(0, 50)
+                            });
+                        }
+                    }
+
+                    if (totalTests > 0) {
+                        connectivityRate = Math.round((success200Tests / totalTests) * 100);
+                        completed = totalTests >= CONFIG.minTotalTests;
+                        break;
+                    }
+                }
+            }
+
+            // 其他查找方法（备用）
+            if (!hasResults) {
+                const testElements = document.querySelectorAll('.test-item, .node-item, .server-item, [class*="ping-"], [class*="test-"]');
+                if (testElements.length > 0) {
+                    totalTests = testElements.length;
+                    hasResults = true;
+
+                    const successElements = document.querySelectorAll('.text-success, .success, .passed, [class*="ok"]');
+                    success200Tests = Math.min(successElements.length, totalTests);
+                    connectivityRate = Math.round((success200Tests / totalTests) * 100);
+                    completed = totalTests >= CONFIG.minTotalTests;
+
+                    // 备用方法无法获取运营商数据
+                    console.log('⚠️ 使用备用方法，无法获取运营商详细数据');
+                }
+            }
+
+            // 检查页面是否显示完成
+            const pageText = document.body.textContent.toLowerCase();
+            if (pageText.includes('测试完成') || pageText.includes('检测完成') || pageText.includes('已完成')) {
+                completed = true;
+            }
+
+        } catch (error) {
+            console.log('提取结果失败:', error);
+        }
+
+        console.log(`📊 提取结果: 总数=${totalTests}, 成功=${success200Tests}, 率=${connectivityRate}%, 完成=${completed}`);
+
+        // 计算运营商摘要
+        const operatorSummary = calculateOperatorSummary(operatorStats);
+
+        return {
+            totalTests: totalTests,
+            success200Tests: success200Tests,
+            connectivityRate: connectivityRate,
+            isCompleted: completed || (totalTests >= CONFIG.minTotalTests && connectivityRate > 0),
+            isLowRate: connectivityRate < CONFIG.minSuccessRate && connectivityRate > 0,
+            hasResults: hasResults,
+            // 新增：运营商数据
+            operatorStats: operatorStats,
+            operatorSummary: operatorSummary
+        };
+    }
+
+    // ==================== 计算运营商摘要 ====================
+    function calculateOperatorSummary(operatorStats) {
+        const summary = {
+            mobileErrors: operatorStats.mobile.total - operatorStats.mobile.success,
+            unicomErrors: operatorStats.unicom.total - operatorStats.unicom.success,
+            telecomErrors: operatorStats.telecom.total - operatorStats.telecom.success,
+            otherErrors: operatorStats.other.total - operatorStats.other.success +
+                        operatorStats.bgp.total - operatorStats.bgp.success,
+
+            mobileTotal: operatorStats.mobile.total,
+            unicomTotal: operatorStats.unicom.total,
+            telecomTotal: operatorStats.telecom.total,
+            otherTotal: operatorStats.other.total + operatorStats.bgp.total,
+
+            mobileSuccess: operatorStats.mobile.success,
+            unicomSuccess: operatorStats.unicom.success,
+            telecomSuccess: operatorStats.telecom.success,
+
+            mobileRate: operatorStats.mobile.total > 0 ?
+                Math.round((operatorStats.mobile.success / operatorStats.mobile.total) * 100) : 0,
+            unicomRate: operatorStats.unicom.total > 0 ?
+                Math.round((operatorStats.unicom.success / operatorStats.unicom.total) * 100) : 0,
+            telecomRate: operatorStats.telecom.total > 0 ?
+                Math.round((operatorStats.telecom.success / operatorStats.telecom.total) * 100) : 0,
+            otherRate: operatorStats.other.total + operatorStats.bgp.total > 0 ?
+                Math.round(((operatorStats.other.success + operatorStats.bgp.success) /
+                          (operatorStats.other.total + operatorStats.bgp.total)) * 100) : 0
+        };
+
+        console.log('📊 运营商摘要:', summary);
+        return summary;
+    }
+
+    // ==================== 发送结果（包含运营商数据） ====================
+    function sendResults(domain, results) {
+        try {
+            if (window.opener && !window.opener.closed) {
+                const data = {
+                    type: 'ITDOG_TEST_RESULT',
+                    domain: domain || '未知域名',
+                    connectivityRate: results.connectivityRate || 0,
+                    totalTests: results.totalTests || 0,
+                    success200Tests: results.success200Tests || 0,
+                    isLowRate: results.isLowRate || false,
+                    isCompleted: results.isCompleted || false,
+                    timestamp: new Date().toISOString(),
+                    source: 'ITDOG_MONITOR_V8.1',
+                    version: '8.1',
+                    // 新增：运营商数据
+                    operatorStats: results.operatorStats || {},
+                    operatorSummary: results.operatorSummary || {},
+                    // 错误状态码（如果有）
+                    otherStatusCodes: extractStatusCodes(results.operatorStats || {})
+                };
+
+                console.log('📤 发送结果到父页面（包含运营商数据）:', data);
+
+                window.opener.postMessage(data, '*');
+
+                // 发送两次确保收到
+                setTimeout(() => {
+                    window.opener.postMessage(data, '*');
+                }, 500);
+
+                return true;
+            }
+
+            return false;
+
+        } catch (error) {
+            console.log('发送结果失败:', error);
+            return false;
+        }
+    }
+
+    // ==================== 提取状态码 ====================
+    function extractStatusCodes(operatorStats) {
+        const statusCodes = [];
+
+        for (const operatorKey in operatorStats) {
+            const operator = operatorStats[operatorKey];
+            if (operator.errors && Array.isArray(operator.errors)) {
+                operator.errors.forEach(error => {
+                    if (error.statusCode && error.statusCode !== 'unknown') {
+                        statusCodes.push(error.statusCode);
+                    }
+                });
+            }
+        }
+
+        return statusCodes;
+    }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
